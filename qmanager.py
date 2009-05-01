@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2006, TUBITAK/UEKAE
+# Copyright (C) 2006-2008 TUBITAK/UEKAE
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,6 +28,10 @@ class QueueManager:
 
         self.__deserialize(self.workQueue, "workQueue")
         self.__deserialize(self.waitQueue, "waitQueue")
+
+        # Ignore empty lines
+        self.workQueue = list(set([s for s in self.workQueue if s]))
+        self.waitQueue = list(set([s for s in self.waitQueue if s]))
 
         if len(self.waitQueue):
             self.workQueue += self.waitQueue

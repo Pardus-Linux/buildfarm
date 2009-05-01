@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2006, TUBITAK/UEKAE
+# Copyright (C) 2006-2008 TUBITAK/UEKAE
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,12 +32,16 @@ class DependencyResolver:
 
         self.bdepmap, self.rdepmap, self.namemap, self.pspeccount = {}, {}, {}, len(self.pspeclist)
 
-        for pspec in self.pspeclist: self.bdepmap[pspec] = self.__getBuildDependencies(pspec)
-        for pspec in self.pspeclist: self.rdepmap[pspec] = self.__getRuntimeDependencies(pspec)
-        for pspec in self.pspeclist: self.namemap[pspec] = self.__getPackageNames(pspec)
+        for pspec in self.pspeclist:
+            self.bdepmap[pspec] = self.__getBuildDependencies(pspec)
+        for pspec in self.pspeclist:
+            self.rdepmap[pspec] = self.__getRuntimeDependencies(pspec)
+        for pspec in self.pspeclist:
+            self.namemap[pspec] = self.__getPackageNames(pspec)
 
     def resolvDeps(self):
-        while not (self.buildDepResolver() and self.runtimeDepResolver()): pass
+        while not (self.buildDepResolver() and self.runtimeDepResolver()):
+            pass
 
         os.chdir(self.oldwd)
         return self.pspeclist
@@ -67,6 +71,8 @@ class DependencyResolver:
         for package in specFile.packages:
             for dep in package.runtimeDependencies():
                 deps += [dep.package]
+
+        deps = list(set(deps).difference(set([p.name for p in specFile.packages])))
 
         return deps
 
@@ -100,9 +106,14 @@ class DependencyResolver:
         clean = True
         for i in range(0, self.pspeccount):
             pspec = self.pspeclist[i]
+            # Current pspec: pspec
             for p in self.bdepmap.get(pspec):
+                # Traverse build dependency list of 'pspec' with p
                 for j in range(i+1, self.pspeccount):
+                    # For each pspec in queue, check if p exists
+                    # in its packages
                     if p in self.namemap.get(self.pspeclist[j]):
+                        # namemap brings package list of a package
                         self.pspeclist.insert(j+1, self.pspeclist.pop(i))
                         clean = False
         return clean
